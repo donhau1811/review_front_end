@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useRef, useState } from "react";
+import React, { useState, useEffect, useRef, forwardRef } from "react";
 import { AiOutlineDoubleLeft, AiOutlineDoubleRight } from "react-icons/ai";
 import { Link } from "react-router-dom";
 import { getLatestUploads } from "../../api/movie";
@@ -6,12 +6,16 @@ import { useNotification } from "../../hooks";
 
 let count = 0;
 let intervalId;
+
+let newTime = 0;
+let lastTime = 0;
+
 export default function HeroSlidShow() {
   const [currentSlide, setCurrentSlide] = useState({});
   const [clonedSlide, setClonedSlide] = useState({});
   const [slides, setSlides] = useState([]);
   const [upNext, setUpNext] = useState([]);
-  const [visible, setVisible] = useState([]);
+  const [visible, setVisible] = useState(true);
   const slideRef = useRef();
   const clonedSlideRef = useRef();
 
@@ -26,7 +30,12 @@ export default function HeroSlidShow() {
   };
 
   const startSlideShow = () => {
-    intervalId = setInterval(handleOnNextClick, 3500);
+    intervalId = setInterval(() => {
+      newTime = Date.now();
+      const delta = newTime - lastTime;
+      if (delta < 4000) return clearInterval(intervalId);
+      handleOnNextClick();
+    }, 3500);
   };
 
   const pauseSlideShow = () => {
@@ -49,8 +58,9 @@ export default function HeroSlidShow() {
     setUpNext([...newSlides]);
   };
 
-  // 0,1,2,3,4
+  //0,1,2,3,4
   const handleOnNextClick = () => {
+    lastTime = Date.now();
     pauseSlideShow();
     setClonedSlide(slides[count]);
     count = (count + 1) % slides.length;
@@ -142,7 +152,7 @@ export default function HeroSlidShow() {
       </div>
 
       {/* Up Next Section */}
-      <div className="w-1/5">
+      <div className="w-1/5 md:block hidden space-y-3 px-3">
         <h1 className="font-semibold text-2xl text-primary dark:text-white">
           Up Next
         </h1>
