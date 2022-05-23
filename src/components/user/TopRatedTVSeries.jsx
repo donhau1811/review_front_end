@@ -9,15 +9,19 @@ export default function TopRatedTVSeries() {
   const [movies, setMovies] = useState([]);
   const { updateNotification } = useNotification();
 
-  const fetchMovies = async () => {
-    const { error, movies } = await getTopRatedMovies("TV Series");
+  const fetchMovies = async (signal) => {
+    const { error, movies } = await getTopRatedMovies("TV Series", signal);
     if (error) return updateNotification("error", error);
 
     setMovies([...movies]);
   };
 
   useEffect(() => {
-    fetchMovies();
+    const ac = new AbortController();
+    fetchMovies(ac.signal);
+    return () => {
+      ac.abort();
+    };
   }, []);
 
   return <MovieList movies={movies} title="Viewers choice (TV Series)" />;
